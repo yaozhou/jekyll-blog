@@ -1,0 +1,266 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Sourceindex技术</title>
+    
+    <meta name="author" content="Name Lastname">
+
+    <!-- Enable responsive viewport -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/themes/twitter/bootstrap/css/bootstrap.2.2.2.min.css" rel="stylesheet">
+    <link href="/assets/themes/twitter/css/style.css?body=1" rel="stylesheet" type="text/css" media="all">
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+
+    <!-- atom & rss feed -->
+    <link href="/atom.xml" type="application/atom+xml" rel="alternate" title="Sitewide ATOM Feed">
+    <link href="/rss.xml" type="application/rss+xml" rel="alternate" title="Sitewide RSS Feed">
+
+  </head>
+
+  <body>
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container-narrow">
+          <a class="brand" href="/">Jekyll Bootstrap</a>
+          <ul class="nav">
+            
+            
+            
+
+
+  
+    
+      
+      	
+      	<li><a href="/pages.html">Pages</a></li>
+      	
+      
+    
+  
+    
+      
+      	
+      	<li><a href="/archive.html">Archive</a></li>
+      	
+      
+    
+  
+    
+      
+    
+  
+    
+      
+      	
+      	<li><a href="/categories.html">Categories</a></li>
+      	
+      
+    
+  
+    
+      
+      	
+      	<li><a href="/tags.html">Tags</a></li>
+      	
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+
+
+
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container-narrow">
+
+      <div class="content">
+        
+<div class="page-header">
+  <h1>Sourceindex技术 <small>Supporting tagline</small></h1>
+</div>
+
+<div class="row-fluid post-full">
+  <div class="span12">
+    <div class="date">
+      <span>28 May 2013</span>
+    </div>
+    <div class="content">
+      <h3 id='id3088'>应用场合</h3>
+
+<p>你是否碰到过这样的场合，远程调试时attach到测试人员的机器的程序上，或者在打开某个crash文件时，发现自己找不到其对应版本的pdb，并且本地的源码也已经发生了变化，而无法调试？虽然通过细致的管理（如保存每个版本的pdb，check out对应的源码)，可以解决此问题，但是很显然我们需要的是一个在exe,pdb,source code间的保持同步的机制。</p>
+
+<h3 id='id3089'>具体方案</h3>
+
+<h4 id='pdbsource_code'>在pdb和source code间保持同步</h4>
+
+<p>利用source index可以做到在pdb文件中嵌入额外的源码版本信息，以达到在pdb和对应版本源码之间保持同步的目的。</p>
+
+<h4 id='execrashpdb'>在exe(crash文件)和pdb间保持同步</h4>
+
+<p>可以在局域网中建立一台符号服务器，保存每个版本的pdb文件，以达到在exe(crash文件)和pdb之间保持同步的目的。</p>
+
+<h3 id='id3090'>具体步骤</h3>
+
+<h4 id='id3091'>准备环境</h4>
+
+<p>安装debugging tools for windows（我用的是v6.12,其他版本未测试过), 添加其中的srcsrv目录到PATH中，方便调用其中的许多命令。</p>
+
+<p>安装svn,推荐1.7版本以上（我用的是TortoiseSVN 1.7.12 64bit)，本文配置针对1.7（因为1.7修改了svn info的输出信息格式，因而需要稍改动下svn.pm文件）,确保svn.exe在PATH中，可以敲入命令svn info查看。</p>
+
+<p>确保svn版本是英文版的，因为程序中会需要解析svn info的输出信息。</p>
+
+<p>安装active perl,脚本中会用到。</p>
+
+<p>修改srcsrv/svn.pm，在ln 208的 if ($FileRevision)后插入一行</p>
+
+<pre><code>$LocalFile = &quot;$SourceRoot\\$LocalFile&quot;</code></pre>
+
+<h4 id='source_indexpdb'>source index(嵌入版本信息到pdb中)</h4>
+
+<p>程序测试结束后，准备发布前，先提交代码，先使得svn服务器有此版本的代码</p>
+
+<pre><code>cd root\of\your\svn\repository</code></pre>
+
+<p>cd到svn仓库的根目录（虽然个人觉得这一步理论上并不是必须，只要能从当前目录及其子目录找到源码和版本之间的关系，哪怕只是一部分就可以了，但是实际使用中如果不是仓库的根目录，就不会成功）</p>
+
+<pre><code>svnindex /debug /source=root\of\your\svn\repository /symbols=path\of\pdb</code></pre>
+
+<p>如能看到类似</p>
+
+<pre><code>“ wrote C:\Users\ayao\AppData\Local\Temp\index103B1.stream to E:\Work\Project\LocalSvn\CrashTest\Debug\CrashTest.pdb ...”</code></pre>
+
+<p>表示pdb已经被嵌入了版本信息</p>
+
+<p>也可以用以下命令验证 srctool your\pdb\file 如果成功可看到类似输出</p>
+
+<pre><code>[e:\work\project\localsvn\crashtest\main.cpp] cmd: cmd /c svn.exe cat &quot;https://127.0.0.1:8443/svn/Test/CrashTest/main.cpp@7&quot; --non-interactive &gt; &quot;E:\Work\Project\LocalSvn\svn\Test\CrashTest\main.cpp\7\main.cpp&quot;</code></pre>
+
+<p>其实pdb文件是个开放的格式，其中的内容由不同的“流”组成，而微软提供的source index技术，就是在pdb中添加了一个名叫&#8221;srcsrv&#8221;的流，其中记录了这个PDB关联到的源文件在编译的时候在本地的地址，以及通过什么样的命令可以获取到，当vs在需要显示源码的时候，会先从看是否在能期待的路径中能找到源文件（这个期待的路径也就是程序被编译的时候的源码路径），如果找不到则会调用pdb中存储的命令行(<strong>注意！！只有在找不到的时候才会触发源码下载的流程，否则会使用本地的源文件，哪怕文件版本不一致，被这个坑了好久。。</strong>），执行之，（这时VS会弹出提示询问是否执行这个脚本），然后期待这个命令执行后，在临时目录中就能有这些文件的存在，然后显示之。</p>
+
+<h4 id='socorrosym_socorro'>生成用于socorro(崩溃转储服务端的sym文件) (如果不用于socorro服务器，则不需要这一步)</h4>
+
+<p><a href='http://s.yunio.com/vecIze'>generate-sym.bat下载</a></p>
+
+<p>将上述几个文件放在要pdb目录中(相匹配的exe也需要同样存在这个目录里），运行generate-sym.bat，顺利的话输出目录中会产生out目录，然后需要手工添加这些文件到socorro服务器中，原先考虑过在socorro服务器上同时添加ftp服务（或者SVN服务），然后可以方便上传这些符号文件，但觉得太倒腾，反正发布版本的频率也不会很高，手工拷过去算了。</p>
+
+<h3 id='pdb'>发布pdb(建立符号服务器）</h3>
+
+<pre><code>symstore add /s \\pdb-server\pub_symbols /r /f path/to/pdb/\*pdb /t your-product-name</code></pre>
+
+<p>其中 &#8220;\pdb-server\pub_symbols&#8221; 为一个局域网中的共享目录（使得大家都能从此目录下载pdb文件），同时自己需要有这个目录的写权限</p>
+
+<h3 id='id3092'>客户端设置</h3>
+
+<p>需要相应地设置VS以使用这些功能</p>
+
+<h4 id='id3093'>添加符号服务器地址</h4>
+
+<p>option -&gt; Debugging -&gt; Symbols 中添加 Symbol file (.pdb) locations &#8220;\pdb-server\pub_symbols&#8221;</p>
+
+<h4 id='source_server'>打开source server支持</h4>
+
+<p>option -&gt; Debugging -&gt; General -&gt; 勾选 Enable source server support 及其子选项 Print source server diagnostic messages to the Output window</p>
+
+<h3 id='id3094'>参考链接</h3>
+
+<p>http://www.hufuman.biz/?tag=symstore</p>
+
+<h3 id='id3095'>相关资源下载</h3>
+
+<p><a href='http://s.yunio.com/uemSbE&quot;'>ActivePerl-5.16.3.1603-MSWin32-x64-296746.msi</a></p>
+
+<p><a href='http://s.yunio.com/zoUV5v'>Debugging Tools for Windows (x64) v6.12.zip</a></p>
+
+<p><a href='http://s.yunio.com/cE4hko&quot;'>Debugging Tools for Windows (x86) v6.12.zip</a></p>
+
+<p><a href='http://s.yunio.com/CKBkUF'>TortoiseSVN_x64_1_7_12.msi</a></p>
+    </div>
+
+  
+    <ul class="tag_box inline">
+      <li><i class="icon-folder-open"></i></li>
+      
+      
+
+
+  
+     
+    	<li><a href="/categories.html#source index技术-ref">
+    		source index技术 <span>1</span>
+    	</a></li>
+    
+  
+
+
+    </ul>
+    
+
+  
+    <ul class="tag_box inline">
+      <li><i class="icon-tags"></i></li>
+      
+      
+
+
+  
+     
+    	<li><a href="/tags.html#调试-ref">调试 <span>3</span></a></li>
+     
+    	<li><a href="/tags.html#source index-ref">source index <span>1</span></a></li>
+    
+  
+
+
+
+    </ul>
+    
+
+    
+</div>
+
+
+      </div>
+      <hr>
+      <footer>
+        <p>&copy; 2013 Name Lastname
+          with help from <a href="http://jekyllbootstrap.com" target="_blank" title="The Definitive Jekyll Blogging Framework">Jekyll Bootstrap</a>
+          and <a href="http://twitter.github.com/bootstrap/" target="_blank">Twitter Bootstrap</a>
+        </p>
+      </footer>
+
+    </div>
+
+    
+  </body>
+</html>
+

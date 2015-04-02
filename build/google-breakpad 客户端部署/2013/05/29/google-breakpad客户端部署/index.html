@@ -1,0 +1,249 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Google Breakpad客户端部署</title>
+    
+    <meta name="author" content="Name Lastname">
+
+    <!-- Enable responsive viewport -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le styles -->
+    <link href="/assets/themes/twitter/bootstrap/css/bootstrap.2.2.2.min.css" rel="stylesheet">
+    <link href="/assets/themes/twitter/css/style.css?body=1" rel="stylesheet" type="text/css" media="all">
+
+    <!-- Le fav and touch icons -->
+  <!-- Update these with your own images
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  -->
+
+    <!-- atom & rss feed -->
+    <link href="/atom.xml" type="application/atom+xml" rel="alternate" title="Sitewide ATOM Feed">
+    <link href="/rss.xml" type="application/rss+xml" rel="alternate" title="Sitewide RSS Feed">
+
+  </head>
+
+  <body>
+    <div class="navbar">
+      <div class="navbar-inner">
+        <div class="container-narrow">
+          <a class="brand" href="/">Jekyll Bootstrap</a>
+          <ul class="nav">
+            
+            
+            
+
+
+  
+    
+      
+      	
+      	<li><a href="/pages.html">Pages</a></li>
+      	
+      
+    
+  
+    
+      
+      	
+      	<li><a href="/archive.html">Archive</a></li>
+      	
+      
+    
+  
+    
+      
+    
+  
+    
+      
+      	
+      	<li><a href="/categories.html">Categories</a></li>
+      	
+      
+    
+  
+    
+      
+      	
+      	<li><a href="/tags.html">Tags</a></li>
+      	
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+    
+      
+    
+  
+
+
+
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container-narrow">
+
+      <div class="content">
+        
+<div class="page-header">
+  <h1>Google Breakpad客户端部署 <small>Supporting tagline</small></h1>
+</div>
+
+<div class="row-fluid post-full">
+  <div class="span12">
+    <div class="date">
+      <span>29 May 2013</span>
+    </div>
+    <div class="content">
+      <h1 id='googlebreakpadwindows'>google-breakpad客户端部署(windows平台）</h1>
+
+<h3 id='id3096'>版本</h3>
+
+<p><a href='http://code.google.com/p/google-breakpad/'>google-breakpad revision 1120</a></p>
+
+<h3 id='id3097'>简介</h3>
+
+<p>google-breakpad提供了绝大部分平台上的崩溃处理，转储成统一的minidump格式，并且有配套的服务端socorro可以针对上传的minidump文件进行后续的堆栈解析、去重复、统计等功能。</p>
+
+<p>本文简单介绍下怎样在windows平台下将google-break嵌入到vc工程中。（其他平台和语言暂未实验）</p>
+
+<h3 id='id3098'>原理</h3>
+
+<p>google-breakpad通过在程序启动时调用</p>
+
+<pre><code>SetUnhandledExceptionFilter()， _set_invalid_parameter_handler(),  _set_purecall_handler()</code></pre>
+
+<p>向系统注册了异常处理的回调函数，当异常发生时，回调函数得到运行，并生成了minidump文件。 其实仅从生成Minidump的角度来说，自己编码</p>
+
+<pre><code>SetUnhandledExceptionFilter(myCallBack)
+然后在myCallBack中调用MinidumpWriteDump()</code></pre>
+
+<p>一样可以生成minidump文件，而之所以选择google-break的原因，是因为</p>
+
+<ol>
+<li>
+<p>google-breakpad支持进程外抓取dump的方式，意味着在一些极限情况下（如程序已经耗尽了某些系统资源，如内存、句柄等或者自身堆栈已经出错，而无力再运行任何其他代码时——包括抓取Minidump的代码),可以由另一个进程相对安全地读取这个这个崩溃进程的快照，并为其生成Minidump。 （不过因为条件太极端，没有实际模拟测试过）</p>
+</li>
+
+<li>
+<p>可以和socorro服务端配合使用。</p>
+</li>
+</ol>
+
+<p>（而相对的google-breakpad的多平台支持的特性却未被使用到，因为目前我们产品只运行在windows平台上）。</p>
+
+<h3 id='id3099'>部署步骤</h3>
+
+<p>因为我已经对google-breakpad做了一些封装，如果不太关心细节的话，可以直接傻瓜式调用即可。</p>
+
+<h4 id='1_smutillib'>1. 包含SMUtil.lib到工程中。</h4>
+
+<h4 id='2_googlebreakpadinclude'>2. 添加google-breakpad的include文件。</h4>
+
+<h4 id='3_crashsenderexeupload_crashbatcurlexe'>3. 将crashSender.exe，upload_crash.bat和curl.exe拷贝到发行目录中（路径随意）</h4>
+
+<ol>
+<li>此crashSender就是崩溃的时候弹出的一个对话框，征询用户是否同意发送crash文件的。目前还比较简陋，但后续会扩充，添加进一些比如问题描述，联系方式等新功能。</li>
+
+<li>upload_crash.bat只是个调用了curl用于发送crash文件的批处理.其中需要修改的是引用curl的路径，以及生成LOG的路径</li>
+</ol>
+
+<h4 id='4_exedlldllexe'>4. 在自己的exe工程中（如果是DLL工程，则需要更改调用此dll的EXE工程）的初始化函数中，添加如下代码</h4>
+
+<pre><code>	SM::ExceptionHandler * pHandler = new SM::ExceptionHandler() ;
+	std::wstring versionStr = MethodToGetYourProductVersion() ;
+	std::wstring submitUrl = MethodToGetYourCrashDumpServerSumbitUrl() ;
+	std::wstring crashPath = your/path/to/store/minidump ;
+	std::wstring crashSender = your/path/to/crashSender ;
+	pHandler-&gt;Init(L&quot;YourProductName&quot;, versionStr, submitUrl, crashPath, crashSender) ;</code></pre>
+
+<h4 id='id3100'>写一个异常入测试</h4>
+
+<pre><code>int * p = NULL ;
+*p = 10 ;</code></pre>
+
+<p>直接运行EXE，会看到弹出对话框询问是否发送错误报告，同时在crashPath中也能看到刚产生的.dmp文件了。</p>
+
+<p>如需进一步定制，或遇到问题，请联系我。</p>
+
+<p><a href='http://s.yunio.com/9R99Tl'>打包资源下载</a></p>
+    </div>
+
+  
+    <ul class="tag_box inline">
+      <li><i class="icon-folder-open"></i></li>
+      
+      
+
+
+  
+     
+    	<li><a href="/categories.html#google-breakpad 客户端部署-ref">
+    		google-breakpad 客户端部署 <span>2</span>
+    	</a></li>
+    
+  
+
+
+    </ul>
+    
+
+  
+    <ul class="tag_box inline">
+      <li><i class="icon-tags"></i></li>
+      
+      
+
+
+  
+     
+    	<li><a href="/tags.html#调试-ref">调试 <span>3</span></a></li>
+     
+    	<li><a href="/tags.html#google-breakpad-ref">google-breakpad <span>2</span></a></li>
+    
+  
+
+
+
+    </ul>
+    
+
+    
+</div>
+
+
+      </div>
+      <hr>
+      <footer>
+        <p>&copy; 2013 Name Lastname
+          with help from <a href="http://jekyllbootstrap.com" target="_blank" title="The Definitive Jekyll Blogging Framework">Jekyll Bootstrap</a>
+          and <a href="http://twitter.github.com/bootstrap/" target="_blank">Twitter Bootstrap</a>
+        </p>
+      </footer>
+
+    </div>
+
+    
+  </body>
+</html>
+

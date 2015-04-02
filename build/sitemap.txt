@@ -1,0 +1,13 @@
+
+http://username.github.io/pages.html
+http://username.github.io/archive.html
+http://username.github.io/rss.xml
+http://username.github.io/categories.html
+http://username.github.io/tags.html
+http://username.github.io/sitemap.txt
+http://username.github.io/index.html
+http://username.github.io/atom.xml
+
+http://username.github.io/google-breakpad 客户端部署/2013/05/30/socorro%E9%83%A8%E7%BD%B2
+http://username.github.io/google-breakpad 客户端部署/2013/05/29/google-breakpad%E5%AE%A2%E6%88%B7%E7%AB%AF%E9%83%A8%E7%BD%B2
+http://username.github.io/source index技术/2013/05/28/sourceindex%E6%8A%80%E6%9C%AF

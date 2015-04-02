@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<rss version="2.0">
+<channel>
+        <title>Jekyll Bootstrap</title>
+        <description>Jekyll Bootstrap - Name Lastname</description>
+        <link>http://username.github.io</link>
+        <link>http://username.github.io</link>
+        <lastBuildDate>2013-07-09T19:57:01+08:00</lastBuildDate>
+        <pubDate>2013-07-09T19:57:01+08:00</pubDate>
+        <ttl>1800</ttl>
+
+
+        <item>
+                <title>Socorro部署</title>
+                <description>&lt;h3 id='id3101'&gt;简介&lt;/h3&gt;
+
+&lt;p&gt;socorro为和google-breakpad配套使用的崩溃转储的服务端，功能强大，但也是我见到过的最复杂的项目，复杂到自己总不禁怀疑其复杂度是否真的有必要，同时也是个非常坑爹的开源项目，我是在修改了6、7处代码后才能正常使用其功能的，并且缺乏必要的文档，导致需要跟踪到代码深处才知道一些必要的数据格式细节。&lt;/p&gt;
+
+&lt;p&gt;总而言之，这是个非常坑的项目，如果有其他选择，不推荐选择它。&lt;/p&gt;
+
+&lt;p&gt;这篇文章在自己修改后的源码为基础，（同时我也添加了一些shell脚本，为方便使用） 另外的文章中介绍修改了哪些部分 (coming soon)&lt;/p&gt;
+
+&lt;p&gt;git仓库 https://github.com/mozilla/socorro.git&lt;/p&gt;
+
+&lt;p&gt;版本 DateDate: Tue Mar 5 17:46:10 2013 -0800&lt;/p&gt;
+
+&lt;p&gt;commit f89c441cb5f035df0035e4283d03f653954e6edf&lt;/p&gt;
+
+&lt;h3 id='id3102'&gt;部署步骤&lt;/h3&gt;
+
+&lt;h4 id='id3103'&gt;下载资源&lt;/h4&gt;
+
+&lt;p&gt;socorro,socorro-crashstats,tools下载 coming soon(等知道怎样解决压缩文件中文件权限的问题后上传）&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;sudo apt-get install curl lessc&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h4 id='postgre'&gt;安装postgre&lt;/h4&gt;
+
+&lt;p&gt;参见另一篇 postgre部署 (coming soon)&lt;/p&gt;
+
+&lt;h4 id='id3104'&gt;安装数据库客户端&lt;/h4&gt;
+
+&lt;pre&gt;&lt;code&gt;sudo apt-get install pgadmin3&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h4 id='id3105'&gt;导入数据库配置&lt;/h4&gt;
+
+&lt;p&gt;tools/import_db.sh 会清空数据库，导入新的数据库配置（其中只包括通用配置，不包含产品信息）&lt;/p&gt;
+
+&lt;h4 id='datasocorro'&gt;添加/data/socorro链接&lt;/h4&gt;
+
+&lt;p&gt;socorro源码中假定socorro的目录为 /data/socorro，很不明白为什么要这么做，因为个人认为完全可以从可执行文件的当前路径计算出根目录，或者提供配置文件，怎么也不至于硬编码目录到源码中。 tools/socorro_link.sh 做个软链接到实际的socorro。(需要根据实际路径进行修改）&lt;/p&gt;
+
+&lt;h4 id='product'&gt;添加product配置&lt;/h4&gt;
+
+&lt;p&gt;执行SQL语句,假设你的产品名为SafeMobile,版本为3.4,平台为windows，发布日期为2013-03-05-000000&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;select add_new_product(&amp;quot;SafeMobile&amp;quot;::TEXT, 3.4::major_version)
+select add_new_release(&amp;#39;SafeMobile&amp;#39;, &amp;#39;3.4&amp;#39;, &amp;#39;Release&amp;#39;, 20130305000000,&amp;#39;Windows&amp;#39;, 0, &amp;#39;release&amp;#39;)
+select update_product_versions()&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h4 id='id3106'&gt;启动服务器&lt;/h4&gt;
+
+&lt;pre&gt;&lt;code&gt;tools/start_postgre.sh 启动数据库
+tools/collector.sh     crash收集服务
+tools/monitor.sh       监测有哪些crash文件被收集到了
+tools/processor.sh     处理收集到的crash文件
+tools/middleware.sh    为crashstates提供API服务
+tools/crashstats.sh    用于显示崩溃信息的web服务器（利用middleware的API服务）
+
+tools/crontabber.sh&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;像系统注册crontab任务，轮循地执行数据库任务，只需要注册一次，可以crontab -e 查看是否已经注册。 crontabber会在本地记录上一次运行某个任务是什么时候，以及多长时间间隔内需要进行一次任务，如果现在的时间离上次运行时间（记录在/socorro/crontabbers.json)离得很远，则crontab则可能会运行很长时间，一种方案是自己修改socorro/socorro/cron/crontabber.py中的时间配置，另一种方案是修改/socorro/crontabbers.json.&lt;/p&gt;
+
+&lt;h4 id='id3107'&gt;测试&lt;/h4&gt;
+
+&lt;p&gt;执行submit.sh 提交crash进行测试 查看网页前端 http://localhost:8000/home/products/SafeMobile&lt;/p&gt;</description>
+                <link>http://username.github.io/google-breakpad 客户端部署/2013/05/30/socorro%E9%83%A8%E7%BD%B2</link>
+                <guid>http://username.github.io/google-breakpad 客户端部署/2013/05/30/socorro部署</guid>
+                <pubDate>2013-05-30T00:00:00+08:00</pubDate>
+        </item>
+
+        <item>
+                <title>Google Breakpad客户端部署</title>
+                <description>&lt;h1 id='googlebreakpadwindows'&gt;google-breakpad客户端部署(windows平台）&lt;/h1&gt;
+
+&lt;h3 id='id3096'&gt;版本&lt;/h3&gt;
+
+&lt;p&gt;&lt;a href='http://code.google.com/p/google-breakpad/'&gt;google-breakpad revision 1120&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id='id3097'&gt;简介&lt;/h3&gt;
+
+&lt;p&gt;google-breakpad提供了绝大部分平台上的崩溃处理，转储成统一的minidump格式，并且有配套的服务端socorro可以针对上传的minidump文件进行后续的堆栈解析、去重复、统计等功能。&lt;/p&gt;
+
+&lt;p&gt;本文简单介绍下怎样在windows平台下将google-break嵌入到vc工程中。（其他平台和语言暂未实验）&lt;/p&gt;
+
+&lt;h3 id='id3098'&gt;原理&lt;/h3&gt;
+
+&lt;p&gt;google-breakpad通过在程序启动时调用&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;SetUnhandledExceptionFilter()， _set_invalid_parameter_handler(),  _set_purecall_handler()&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;向系统注册了异常处理的回调函数，当异常发生时，回调函数得到运行，并生成了minidump文件。 其实仅从生成Minidump的角度来说，自己编码&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;SetUnhandledExceptionFilter(myCallBack)
+然后在myCallBack中调用MinidumpWriteDump()&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;一样可以生成minidump文件，而之所以选择google-break的原因，是因为&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;google-breakpad支持进程外抓取dump的方式，意味着在一些极限情况下（如程序已经耗尽了某些系统资源，如内存、句柄等或者自身堆栈已经出错，而无力再运行任何其他代码时——包括抓取Minidump的代码),可以由另一个进程相对安全地读取这个这个崩溃进程的快照，并为其生成Minidump。 （不过因为条件太极端，没有实际模拟测试过）&lt;/p&gt;
+&lt;/li&gt;
+
+&lt;li&gt;
+&lt;p&gt;可以和socorro服务端配合使用。&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;（而相对的google-breakpad的多平台支持的特性却未被使用到，因为目前我们产品只运行在windows平台上）。&lt;/p&gt;
+
+&lt;h3 id='id3099'&gt;部署步骤&lt;/h3&gt;
+
+&lt;p&gt;因为我已经对google-breakpad做了一些封装，如果不太关心细节的话，可以直接傻瓜式调用即可。&lt;/p&gt;
+
+&lt;h4 id='1_smutillib'&gt;1. 包含SMUtil.lib到工程中。&lt;/h4&gt;
+
+&lt;h4 id='2_googlebreakpadinclude'&gt;2. 添加google-breakpad的include文件。&lt;/h4&gt;
+
+&lt;h4 id='3_crashsenderexeupload_crashbatcurlexe'&gt;3. 将crashSender.exe，upload_crash.bat和curl.exe拷贝到发行目录中（路径随意）&lt;/h4&gt;
+
+&lt;ol&gt;
+&lt;li&gt;此crashSender就是崩溃的时候弹出的一个对话框，征询用户是否同意发送crash文件的。目前还比较简陋，但后续会扩充，添加进一些比如问题描述，联系方式等新功能。&lt;/li&gt;
+
+&lt;li&gt;upload_crash.bat只是个调用了curl用于发送crash文件的批处理.其中需要修改的是引用curl的路径，以及生成LOG的路径&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h4 id='4_exedlldllexe'&gt;4. 在自己的exe工程中（如果是DLL工程，则需要更改调用此dll的EXE工程）的初始化函数中，添加如下代码&lt;/h4&gt;
+
+&lt;pre&gt;&lt;code&gt;	SM::ExceptionHandler * pHandler = new SM::ExceptionHandler() ;
+	std::wstring versionStr = MethodToGetYourProductVersion() ;
+	std::wstring submitUrl = MethodToGetYourCrashDumpServerSumbitUrl() ;
+	std::wstring crashPath = your/path/to/store/minidump ;
+	std::wstring crashSender = your/path/to/crashSender ;
+	pHandler-&amp;gt;Init(L&amp;quot;YourProductName&amp;quot;, versionStr, submitUrl, crashPath, crashSender) ;&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h4 id='id3100'&gt;写一个异常入测试&lt;/h4&gt;
+
+&lt;pre&gt;&lt;code&gt;int * p = NULL ;
+*p = 10 ;&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;直接运行EXE，会看到弹出对话框询问是否发送错误报告，同时在crashPath中也能看到刚产生的.dmp文件了。&lt;/p&gt;
+
+&lt;p&gt;如需进一步定制，或遇到问题，请联系我。&lt;/p&gt;
+
+&lt;p&gt;&lt;a href='http://s.yunio.com/9R99Tl'&gt;打包资源下载&lt;/a&gt;&lt;/p&gt;</description>
+                <link>http://username.github.io/google-breakpad 客户端部署/2013/05/29/google-breakpad%E5%AE%A2%E6%88%B7%E7%AB%AF%E9%83%A8%E7%BD%B2</link>
+                <guid>http://username.github.io/google-breakpad 客户端部署/2013/05/29/google-breakpad客户端部署</guid>
+                <pubDate>2013-05-29T00:00:00+08:00</pubDate>
+        </item>
+
+        <item>
+                <title>Sourceindex技术</title>
+                <description>&lt;h3 id='id3088'&gt;应用场合&lt;/h3&gt;
+
+&lt;p&gt;你是否碰到过这样的场合，远程调试时attach到测试人员的机器的程序上，或者在打开某个crash文件时，发现自己找不到其对应版本的pdb，并且本地的源码也已经发生了变化，而无法调试？虽然通过细致的管理（如保存每个版本的pdb，check out对应的源码)，可以解决此问题，但是很显然我们需要的是一个在exe,pdb,source code间的保持同步的机制。&lt;/p&gt;
+
+&lt;h3 id='id3089'&gt;具体方案&lt;/h3&gt;
+
+&lt;h4 id='pdbsource_code'&gt;在pdb和source code间保持同步&lt;/h4&gt;
+
+&lt;p&gt;利用source index可以做到在pdb文件中嵌入额外的源码版本信息，以达到在pdb和对应版本源码之间保持同步的目的。&lt;/p&gt;
+
+&lt;h4 id='execrashpdb'&gt;在exe(crash文件)和pdb间保持同步&lt;/h4&gt;
+
+&lt;p&gt;可以在局域网中建立一台符号服务器，保存每个版本的pdb文件，以达到在exe(crash文件)和pdb之间保持同步的目的。&lt;/p&gt;
+
+&lt;h3 id='id3090'&gt;具体步骤&lt;/h3&gt;
+
+&lt;h4 id='id3091'&gt;准备环境&lt;/h4&gt;
+
+&lt;p&gt;安装debugging tools for windows（我用的是v6.12,其他版本未测试过), 添加其中的srcsrv目录到PATH中，方便调用其中的许多命令。&lt;/p&gt;
+
+&lt;p&gt;安装svn,推荐1.7版本以上（我用的是TortoiseSVN 1.7.12 64bit)，本文配置针对1.7（因为1.7修改了svn info的输出信息格式，因而需要稍改动下svn.pm文件）,确保svn.exe在PATH中，可以敲入命令svn info查看。&lt;/p&gt;
+
+&lt;p&gt;确保svn版本是英文版的，因为程序中会需要解析svn info的输出信息。&lt;/p&gt;
+
+&lt;p&gt;安装active perl,脚本中会用到。&lt;/p&gt;
+
+&lt;p&gt;修改srcsrv/svn.pm，在ln 208的 if ($FileRevision)后插入一行&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;$LocalFile = &amp;quot;$SourceRoot\\$LocalFile&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h4 id='source_indexpdb'&gt;source index(嵌入版本信息到pdb中)&lt;/h4&gt;
+
+&lt;p&gt;程序测试结束后，准备发布前，先提交代码，先使得svn服务器有此版本的代码&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;cd root\of\your\svn\repository&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;cd到svn仓库的根目录（虽然个人觉得这一步理论上并不是必须，只要能从当前目录及其子目录找到源码和版本之间的关系，哪怕只是一部分就可以了，但是实际使用中如果不是仓库的根目录，就不会成功）&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;svnindex /debug /source=root\of\your\svn\repository /symbols=path\of\pdb&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;如能看到类似&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;“ wrote C:\Users\ayao\AppData\Local\Temp\index103B1.stream to E:\Work\Project\LocalSvn\CrashTest\Debug\CrashTest.pdb ...”&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;表示pdb已经被嵌入了版本信息&lt;/p&gt;
+
+&lt;p&gt;也可以用以下命令验证 srctool your\pdb\file 如果成功可看到类似输出&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;[e:\work\project\localsvn\crashtest\main.cpp] cmd: cmd /c svn.exe cat &amp;quot;https://127.0.0.1:8443/svn/Test/CrashTest/main.cpp@7&amp;quot; --non-interactive &amp;gt; &amp;quot;E:\Work\Project\LocalSvn\svn\Test\CrashTest\main.cpp\7\main.cpp&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;其实pdb文件是个开放的格式，其中的内容由不同的“流”组成，而微软提供的source index技术，就是在pdb中添加了一个名叫&amp;#8221;srcsrv&amp;#8221;的流，其中记录了这个PDB关联到的源文件在编译的时候在本地的地址，以及通过什么样的命令可以获取到，当vs在需要显示源码的时候，会先从看是否在能期待的路径中能找到源文件（这个期待的路径也就是程序被编译的时候的源码路径），如果找不到则会调用pdb中存储的命令行(&lt;strong&gt;注意！！只有在找不到的时候才会触发源码下载的流程，否则会使用本地的源文件，哪怕文件版本不一致，被这个坑了好久。。&lt;/strong&gt;），执行之，（这时VS会弹出提示询问是否执行这个脚本），然后期待这个命令执行后，在临时目录中就能有这些文件的存在，然后显示之。&lt;/p&gt;
+
+&lt;h4 id='socorrosym_socorro'&gt;生成用于socorro(崩溃转储服务端的sym文件) (如果不用于socorro服务器，则不需要这一步)&lt;/h4&gt;
+
+&lt;p&gt;&lt;a href='http://s.yunio.com/vecIze'&gt;generate-sym.bat下载&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;将上述几个文件放在要pdb目录中(相匹配的exe也需要同样存在这个目录里），运行generate-sym.bat，顺利的话输出目录中会产生out目录，然后需要手工添加这些文件到socorro服务器中，原先考虑过在socorro服务器上同时添加ftp服务（或者SVN服务），然后可以方便上传这些符号文件，但觉得太倒腾，反正发布版本的频率也不会很高，手工拷过去算了。&lt;/p&gt;
+
+&lt;h3 id='pdb'&gt;发布pdb(建立符号服务器）&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code&gt;symstore add /s \\pdb-server\pub_symbols /r /f path/to/pdb/\*pdb /t your-product-name&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;其中 &amp;#8220;\pdb-server\pub_symbols&amp;#8221; 为一个局域网中的共享目录（使得大家都能从此目录下载pdb文件），同时自己需要有这个目录的写权限&lt;/p&gt;
+
+&lt;h3 id='id3092'&gt;客户端设置&lt;/h3&gt;
+
+&lt;p&gt;需要相应地设置VS以使用这些功能&lt;/p&gt;
+
+&lt;h4 id='id3093'&gt;添加符号服务器地址&lt;/h4&gt;
+
+&lt;p&gt;option -&amp;gt; Debugging -&amp;gt; Symbols 中添加 Symbol file (.pdb) locations &amp;#8220;\pdb-server\pub_symbols&amp;#8221;&lt;/p&gt;
+
+&lt;h4 id='source_server'&gt;打开source server支持&lt;/h4&gt;
+
+&lt;p&gt;option -&amp;gt; Debugging -&amp;gt; General -&amp;gt; 勾选 Enable source server support 及其子选项 Print source server diagnostic messages to the Output window&lt;/p&gt;
+
+&lt;h3 id='id3094'&gt;参考链接&lt;/h3&gt;
+
+&lt;p&gt;http://www.hufuman.biz/?tag=symstore&lt;/p&gt;
+
+&lt;h3 id='id3095'&gt;相关资源下载&lt;/h3&gt;
+
+&lt;p&gt;&lt;a href='http://s.yunio.com/uemSbE&amp;quot;'&gt;ActivePerl-5.16.3.1603-MSWin32-x64-296746.msi&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href='http://s.yunio.com/zoUV5v'&gt;Debugging Tools for Windows (x64) v6.12.zip&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href='http://s.yunio.com/cE4hko&amp;quot;'&gt;Debugging Tools for Windows (x86) v6.12.zip&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href='http://s.yunio.com/CKBkUF'&gt;TortoiseSVN_x64_1_7_12.msi&lt;/a&gt;&lt;/p&gt;</description>
+                <link>http://username.github.io/source index技术/2013/05/28/sourceindex%E6%8A%80%E6%9C%AF</link>
+                <guid>http://username.github.io/source index技术/2013/05/28/sourceindex技术</guid>
+                <pubDate>2013-05-28T00:00:00+08:00</pubDate>
+        </item>
+
+
+</channel>
+</rss>
