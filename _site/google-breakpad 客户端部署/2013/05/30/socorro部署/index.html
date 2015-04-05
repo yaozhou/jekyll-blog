@@ -47,21 +47,17 @@
   
     
       
+    
+  
+    
+      
+    
+  
+    
+      
       	
       	<li><a href="/pages.html">Pages</a></li>
       	
-      
-    
-  
-    
-      
-      	
-      	<li><a href="/archive.html">Archive</a></li>
-      	
-      
-    
-  
-    
       
     
   
@@ -91,6 +87,10 @@
   
     
       
+      	
+      	<li><a href="/archive.html">Archive</a></li>
+      	
+      
     
   
 
@@ -115,7 +115,8 @@
       <span>30 May 2013</span>
     </div>
     <div class="content">
-      <h3 id='id14'>简介</h3>
+      
+<h3 id="">简介</h3>
 
 <p>socorro为和google-breakpad配套使用的崩溃转储的服务端，功能强大，但也是我见到过的最复杂的项目，复杂到自己总不禁怀疑其复杂度是否真的有必要，同时也是个非常坑爹的开源项目，我是在修改了6、7处代码后才能正常使用其功能的，并且缺乏必要的文档，导致需要跟踪到代码深处才知道一些必要的数据格式细节。</p>
 
@@ -129,39 +130,39 @@
 
 <p>commit f89c441cb5f035df0035e4283d03f653954e6edf</p>
 
-<h3 id='id15'>部署步骤</h3>
+<h3 id="_2">部署步骤</h3>
 
-<h4 id='id16'>下载资源</h4>
+<h4 id="_3">下载资源</h4>
 
 <p>socorro,socorro-crashstats,tools下载 coming soon(等知道怎样解决压缩文件中文件权限的问题后上传）</p>
 
 <pre><code>sudo apt-get install curl lessc</code></pre>
 
-<h4 id='postgre'>安装postgre</h4>
+<h4 id="postgre">安装postgre</h4>
 
 <p>参见另一篇 postgre部署 (coming soon)</p>
 
-<h4 id='id17'>安装数据库客户端</h4>
+<h4 id="_4">安装数据库客户端</h4>
 
 <pre><code>sudo apt-get install pgadmin3</code></pre>
 
-<h4 id='id18'>导入数据库配置</h4>
+<h4 id="_5">导入数据库配置</h4>
 
 <p>tools/import_db.sh 会清空数据库，导入新的数据库配置（其中只包括通用配置，不包含产品信息）</p>
 
-<h4 id='datasocorro'>添加/data/socorro链接</h4>
+<h4 id="datasocorro">添加/data/socorro链接</h4>
 
 <p>socorro源码中假定socorro的目录为 /data/socorro，很不明白为什么要这么做，因为个人认为完全可以从可执行文件的当前路径计算出根目录，或者提供配置文件，怎么也不至于硬编码目录到源码中。 tools/socorro_link.sh 做个软链接到实际的socorro。(需要根据实际路径进行修改）</p>
 
-<h4 id='product'>添加product配置</h4>
+<h4 id="product">添加product配置</h4>
 
 <p>执行SQL语句,假设你的产品名为SafeMobile,版本为3.4,平台为windows，发布日期为2013-03-05-000000</p>
 
 <pre><code>select add_new_product(&quot;SafeMobile&quot;::TEXT, 3.4::major_version)
-select add_new_release(&#39;SafeMobile&#39;, &#39;3.4&#39;, &#39;Release&#39;, 20130305000000,&#39;Windows&#39;, 0, &#39;release&#39;)
+select add_new_release('SafeMobile', '3.4', 'Release', 20130305000000,'Windows', 0, 'release')
 select update_product_versions()</code></pre>
 
-<h4 id='id19'>启动服务器</h4>
+<h4 id="_6">启动服务器</h4>
 
 <pre><code>tools/start_postgre.sh 启动数据库
 tools/collector.sh     crash收集服务
@@ -174,9 +175,10 @@ tools/crontabber.sh</code></pre>
 
 <p>像系统注册crontab任务，轮循地执行数据库任务，只需要注册一次，可以crontab -e 查看是否已经注册。 crontabber会在本地记录上一次运行某个任务是什么时候，以及多长时间间隔内需要进行一次任务，如果现在的时间离上次运行时间（记录在/socorro/crontabbers.json)离得很远，则crontab则可能会运行很长时间，一种方案是自己修改socorro/socorro/cron/crontabber.py中的时间配置，另一种方案是修改/socorro/crontabbers.json.</p>
 
-<h4 id='id20'>测试</h4>
+<h4 id="_7">测试</h4>
 
 <p>执行submit.sh 提交crash进行测试 查看网页前端 http://localhost:8000/home/products/SafeMobile</p>
+
     </div>
 
   
@@ -227,7 +229,7 @@ tools/crontabber.sh</code></pre>
       </div>
       <hr>
       <footer>
-        <p>&copy; 2014 Name Lastname
+        <p>&copy; 2015 Name Lastname
           with help from <a href="http://jekyllbootstrap.com" target="_blank" title="The Definitive Jekyll Blogging Framework">Jekyll Bootstrap</a>
           and <a href="http://twitter.github.com/bootstrap/" target="_blank">Twitter Bootstrap</a>
         </p>
