@@ -1,5 +1,11 @@
 #!/bin/sh
 
+asscii error
+export LANG=en_US.UTF-8
+export LANGUAGE=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
+export RUBYOPT="-KU -E utf-8:utf-8"
+
 PWD="$(cd $(dirname $0) && pwd)"
 
 GITHUB_PATH="/home/eric-zhou/develop/yaozhou.github.io"
